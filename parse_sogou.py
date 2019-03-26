@@ -14,7 +14,7 @@ from urllib.parse import quote
 
 fetch_service = "http://snapshot.sogou/agent/wget.php?"
 
-regex_vr = '\<div id=\"sogou_vr_(.*?)_'
+regex_vr = '\<div.*id=\"sogou_vr_(.*?)_'
 regex_lizhi = '\<div .* id=\"sogou_vr_kmap_(.*?)_'
 regex_tupu = '\<div .* id=\"lz-top-(.*?)\"'
 regex_tupu_8_1 = 'id=\"kmap-jzvr-81-container\"'
@@ -72,9 +72,11 @@ def extract_lizhi_icon(first_result):
 
 def classify_res(first_result):
 
+    result = {'res_type':'',
+              'vrid':'',
+              'error':''}
+
     #根据vrid的正则规则判断结果类别
-    res_type = ""
-    vrid = ""
 
     try:
         pat_vr = re.search(regex_vr, first_result)
@@ -83,56 +85,57 @@ def classify_res(first_result):
         pat_tupu_8_1 = re.search(regex_tupu_8_1, first_result)
 
         if pat_vr:
-            vrid = pat_vr.group(1)
-            res_type = "VR"
+            result['vrid'] = pat_vr.group(1)
+            if vr_vrid.startswith(('1', '2', '4', '7')):
+                result['res_type'] = "VR"
 
         if pat_lizhi:
-            vrid = pat_lizhi.group(1)
-            res_type = "Lizhi"
+            result['vrid'] = pat_lizhi.group(1)
+            result['res_type'] = "Lizhi"
 
         if pat_tupu:
-            vrid = pat_tupu.group(1)
-            res_type = "Tupu"
+            result['vrid'] = pat_tupu.group(1)
+            result['res_type'] = "Tupu"
 
         #图谱结果中的特例，query=描写冬天冷的词语，vrid=kmap-jzvr-81-container
         if pat_tupu_8_1:
-            vrid = "kmap-jzvr-81-container"
-            res_type = "Tupu"
+            result['vrid'] = "kmap-jzvr-81-container"
+            result['res_type'] = "Tupu"
 
-        return res_type, vrid
+        return result
 
     except Exception as err:
         print('[classify_res]:%s' % err)
-        return None, None
+        return None
 
 
 def parse_sogou(first_result):
 
     lizhi_flag = extract_lizhi_icon(first_result)
-    res_type, vrid = classify_res(first_result)
+    result = classify_res(first_result)
 
     if lizhi_flag:
         #print("res_type=%s, vrid=%s" % (res_type, vrid))
-        return res_type, vrid
+        return result
 
     if not lizhi_flag:
-        if "50026601" == vrid or "50026401" == vrid or "50026301" == vrid or "kmap-jzvr-81-container" == vrid:
+        if "50026601" == result['vrid'] or "50026401" == result['vrid'] or "50026301" == result['vrid'] or "kmap-jzvr-81-container" == result['vrid']:
             #print("res_type=%s, vrid=%s" % (res_type, vrid))
-            return res_type, vrid
+            return result
         else:
-            return None, None
-
-
+            return None
 
 if __name__ == "__main__":
 
-    res = fetch_res("wap_sogou", "百度经验一天能赚200")
+    res = fetch_res("wap_sogou", "菠萝怎么吃")
     #utf8stdout(res)
     first_res = extract_first_res(res)
     #utf8stdout(first_res)
     lizhi_flag = extract_lizhi_icon(first_res)
     print("lizhi_flag=%s" % lizhi_flag)
     #classify_res(first_res)
-    res_type , vrid = parse_sogou(first_res)
-    print("res_type=%s, vrid=%s" % (res_type, vrid))
+    res_dict = parse_sogou(first_res)
+    if res_dict:
+        for key in res_dict:
+            print('key:%s  value:%s' % (key, res_dict[key]))
 
