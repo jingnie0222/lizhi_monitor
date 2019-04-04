@@ -329,3 +329,45 @@ def html_table(data, table_head = [], table_class="bx", dict_keys = []):
     
 def html_a_link(link, content):
     return "".join(['<a href="', link, '" target="_blank">', content, '</a>'])
+
+def double_dict_to_html_table(data, table_head = [], dict_keys = []):
+    return_data = []
+    return_data.append("<table border=\"2\">")
+    return_data.append("<tr>")
+    if(len(table_head) > 0):   #处理表格头部信息
+        return_data.append('<th>')
+        return_data.append("</th><th>".join(table_head))
+        return_data.append('</th></tr>')
+
+    if(len(data) > 0):
+        for row in data:
+            return_data.append('<tr><td>')
+            return_data.append(row)
+
+            inst_data_row = []
+            for s_key in dict_keys:
+                inst_data_row.append(str(data[row].get(s_key, ""))) #这里做str的处理，省得传入int的时候失败
+            row = inst_data_row
+            return_data.append('</td><td>')
+            return_data.append("</td><td>".join(row))
+            return_data.append("</td></tr>\n")
+    return "".join(return_data) + "</table>"
+
+def single_dict_to_html_table(data, table_head = [], dict_keys = []):
+    return_data = []
+    return_data.append("<table border=\"2\">")
+    return_data.append("<tr>")
+    if(len(table_head) > 0):   #处理表格头部信息
+        return_data.append('<th>')
+        return_data.append("</th><th>".join(table_head))
+        return_data.append('</th></tr>')
+
+    return_data.append('<tr><td>')
+    inst_data_row = []
+    if(len(data) > 0):
+        for s_key in dict_keys:
+            inst_data_row.append(str(data.get(s_key, "")))
+        return_data.append("</td><td>".join(inst_data_row))
+        return_data.append("</td></tr>\n")
+
+    return "".join(return_data) + "</table>"
