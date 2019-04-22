@@ -30,6 +30,11 @@ def write_full_file(filepath, content, my_encoding="utf-8"):
         wfp.write(content)
     return True
 
+def add_write_full_file(filepath, content, my_encoding="utf-8"):
+    with open(filepath, "a", encoding=my_encoding) as wfp:
+        wfp.write(content)
+    return True
+
 #读取用\t分割的数据文件
 def load_data_file(filepath, table_head, my_encoding = "utf-8"):
     ret_data = []
