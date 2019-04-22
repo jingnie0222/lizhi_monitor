@@ -4,7 +4,7 @@ import socket
 #from lib import AceConfLoader
 import configparser
 import codecs
-import pymysql.connections
+import pymysql
    
 #support from read from mysql setting file.
 def init_db(mysql_conf_path, sector = "Mysql"):
@@ -13,6 +13,7 @@ def init_db(mysql_conf_path, sector = "Mysql"):
     cf = configparser.ConfigParser()
     cf.readfp(codecs.open(mysql_conf_path, "r", "utf8")) #注意需要用encoding处理中文的输出问题
     mysql_config = cf[sector]
+    print(mysql_config)
     db = DBHelper({ "host":mysql_config['host'], 
                     "port":int(mysql_config['port']),
                     "user": mysql_config['username'],
@@ -40,7 +41,7 @@ class DBHelper:
         if(not 'passwd' in config.keys()):
             print ("using no passwd mode.",2)
             try:
-                self._conn = pymysql.connects(host=config['host'],
+                self._conn = pymysql.connect(host=config['host'],
                                                      port=config['port'],
                                                      user=config['user'],
                                                      db=config['dbname'],
@@ -51,7 +52,7 @@ class DBHelper:
                 self._print_error()
         else:
             try:
-                self._conn = mysql.connects(host=config['host'],
+                self._conn = pymysql.connect(host=config['host'],
                                                      port=config['port'],
                                                      user=config['user'],
                                                      passwd=config['passwd'],
