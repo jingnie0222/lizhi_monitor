@@ -266,6 +266,9 @@ def html_h3_title(content):
     
 def html_p(content):
     return "".join(["<p>", content, "</p>"])
+
+def html_p_spe(content):
+    return "".join(['<p style="font-family:verdana;font-size:90%;color:green">', content, "</p>"])
     
 #获得图片img
 def html_img(img_url):
@@ -328,9 +331,9 @@ def html_table(data, table_head = [], table_class="bx", dict_keys = []):
     return "".join(return_data)
     
 def html_a_link(link, content):
-    return "".join(['<a href="', link, '" target="_blank">', content, '</a>'])
+    return "".join(['<a href="', link, '" target="_blank">', content, '<br />', '</a>'])
 
-def double_dict_to_html_table(data, table_head = [], dict_keys = []):
+def double_dict_to_html_table(data, word_count, table_head = [], dict_keys = []):
     return_data = []
     return_data.append("<table border=\"2\">")
     return_data.append("<tr>")
@@ -346,7 +349,9 @@ def double_dict_to_html_table(data, table_head = [], dict_keys = []):
 
             inst_data_row = []
             for s_key in dict_keys:
-                inst_data_row.append(str(data[row].get(s_key, ""))) #这里做str的处理，省得传入int的时候失败
+                value = data[row].get(s_key, "")
+                percent = format((value/word_count)*100, '.2f')
+                inst_data_row.append(str(value) + "(" + percent + "%)") #这里做str的处理，省得传入int的时候失败
             row = inst_data_row
             return_data.append('</td><td>')
             return_data.append("</td><td>".join(row))
