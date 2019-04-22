@@ -56,7 +56,7 @@ def get_sogou_first_screenshot(query, pic_dir):
             right = target.location['x'] + target.size['width']
             bottom = target.location['y'] + target.size['height']
 
-            im = Image.open('temp.png')
+            im = Image.open(pic_dir + "/" + query + "_sogou_total.png")
             im = im.crop((left, top, right, bottom))
             im.save(pic_dir + "/" + query + "_sogou.png")
         #截取完成后，删除整张截图
