@@ -163,7 +163,8 @@ def parse_sogou(page):
     try:
         first_result = extract_first_res(page)
         if not first_result:
-            result['error'] = "no first result"
+            result['error'] = "[parse_sogou]extract first res error"
+            result['res_type'] = "Error"
             return result
 
         lizhi_flag = extract_lizhi_icon(page)
@@ -196,16 +197,17 @@ def parse_sogou(page):
             return result
 
         #普通结果
+        result['res_type'] = "Other"
         return result
 
     except Exception as err:
-        result['error'] = err
-        #return None
+        result['error'] = "[parse_sogou]" + err
+        result['res_type'] = "Error"
         return result
 
 if __name__ == "__main__":
 
-    page = fetch_res("wap_sogou", "如何挽回丈夫")
+    page = fetch_res("wap_sogou", "艾滋病")
     #utf8stdout(page)
     first_res = extract_first_res(page)
     #utf8stdout(first_res)

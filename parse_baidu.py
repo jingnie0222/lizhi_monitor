@@ -113,10 +113,11 @@ def parse_baidu(page):
     try:
         first_result = extract_first_res(page)
         if not first_result:
-            result['error'] = "no first result"
+            result['error'] = "[parse_baidu]extract first res error"
+            result['res_type'] = "Error"
             return result
 
-        #百度的精选问答结果，标识为srcid="wenda_abstract",tpl="wenda_abstract" 对标搜狗的通用立知
+        #百度的精选摘要结果，标识为srcid="wenda_abstract",tpl="wenda_abstract" 对标搜狗的通用立知
         #百度的优质问答结果，标识为tpl="wenda_abstract"，srcid是一个五位数 对标搜狗的优质问答
         #这两类统一归类为Lizhi结果
         if r'tpl="wenda_abstract"' in first_result:
@@ -146,11 +147,12 @@ def parse_baidu(page):
                 return result
 
         #其他结果包括VR结果，归为普通结果
+        result['res_type'] = "Other"
         return result
 
     except Exception as err:
-        result['error'] = err
-        #return None
+        result['error'] = "[parse_baidu]" + err
+        result['res_type'] = "Error"
         return result
 
 
@@ -247,8 +249,40 @@ def extract_baidu_result_new(html):
                         content.replace('<em>', '').replace('</em>', '')))
     return res
 
+def extract_tupu_content(page):
+
+    try:
+        parsed_html = BeautifulSoup(page, "html.parser")
+        bigdiv = parsed_html.select_one("div[order=\"1\"]")
+        content = ""
+
+        if 'tpl="ks_general"' in bigdiv:
+            lable = bigdiv.select_one(".c-container").select("p")
+            for el in lable:
+                content += el.text
+            return content
+
+        if 'tpl="person_couple"' in bigdiv:
+            lable = bigdiv.select_one(".c-row")
+            return lable.text
+
+        if 'tpl="kg_answer_poem"' in bigdiv:
+            lable = bigdiv.select_one(".wa-kg-answer-poem-wrapping")
+            return lable.text
+
+        if 'tpl="kg_qanda"' in bigdiv:
+            lable = bigdiv.select_one(".c-border")
+            return lable.text
+
+    except Exception as err:
+        print("[extract_tupu_content]:%s" % err)
+
+
 if __name__ == "__main__":
-    page = fetch_res("wap_baidu", "我的绝色总裁未婚妻")
+    page = fetch_res("wap_baidu", "迪丽热巴身高")
     res_dict = parse_baidu(page)
     print(res_dict)
+
+
+
 
