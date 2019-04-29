@@ -14,6 +14,7 @@ from urllib.parse import quote
 from functools import reduce
 from lxml import etree
 from bs4 import BeautifulSoup
+import pysnooper
 
 fetch_service = "http://snapshot.sogou/agent/wget.php?"
 #regex_first = r'<div id="results"(.*?)order="1"(.*)<div class=.*order="2"'
@@ -22,7 +23,7 @@ regex_first = r'<div id="results"(.*)<div class="c-result result".*order="2"'
 
 baidu_kmap_list = ['tpl="ks_general"', 'tpl="person_couple"', 'tpl="wise_word_poem"', 'tpl="kg_answer_poem"', 'tpl="sg_answer_poem"', 'tpl="kg_law"' , 'tpl="kg_qanda"', '百度知识图谱']
 baidu_baike_list = ['tpl="bk_polysemy"', 'tpl="sg_kg_entity"']
-baidu_official_list = ['tpl="www_sitelink_normal"', 'aria-label="标签.官网."']
+baidu_official_list = ['tpl="www_sitelink_normal"', 'aria-label="标签.官网."', 'aria-label="标签.来自官方."']
 
 
 def log_error(str):
@@ -82,11 +83,11 @@ def fetch_list(data, lstr_lst, rstr_lst):
 
 def extract_first_res(page):
     try:
-        pat_first = re.search(regex_first, page)
-        if pat_first:
-            first_res = pat_first.group(1)
-            #print(first_res)
-            return first_res
+        parsed_html = BeautifulSoup(page, "html.parser")
+        first_res = parsed_html.select_one("div[order=\"1\"]")
+        if first_res:
+            #first_res是bs4.element.tag类型，将其转化为str
+            return str(first_res)
         else:
             print('[extract_baidu_first_res]:没有找到首条结果')
             return None
@@ -105,6 +106,7 @@ def is_Official(first_result):
         print("[is_baidu_Official]:%s" % err)
         return False
 
+
 def parse_baidu(page):
 
     result = {'res_type':'',
@@ -112,6 +114,8 @@ def parse_baidu(page):
               'error':''}
     try:
         first_result = extract_first_res(page)
+        #print("frist_res : %s" % first_result)
+
         if not first_result:
             result['error'] = "[parse_baidu]extract first res error"
             result['res_type'] = "Error"
@@ -255,6 +259,7 @@ def extract_tupu_content(page):
         parsed_html = BeautifulSoup(page, "html.parser")
         bigdiv = parsed_html.select_one("div[order=\"1\"]")
         content = ""
+        print("bigdiv = %s" % bigdiv.prettify())
 
         if 'tpl="ks_general"' in bigdiv:
             lable = bigdiv.select_one(".c-container").select("p")
@@ -279,7 +284,7 @@ def extract_tupu_content(page):
 
 
 if __name__ == "__main__":
-    page = fetch_res("wap_baidu", "迪丽热巴身高")
+    page = fetch_res("wap_baidu", "企业更改名字要多久")
     res_dict = parse_baidu(page)
     print(res_dict)
 
